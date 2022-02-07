@@ -14,6 +14,7 @@ dependencies:
   stacked: ^2.2.8
   stacked_services: ^0.8.16
   logger: ^1.1.0
+  qr_code_scanner: ^0.6.1
 
 dev_dependencies:
   flutter_test:
