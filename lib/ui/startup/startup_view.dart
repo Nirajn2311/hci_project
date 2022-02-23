@@ -11,10 +11,10 @@ class StartUpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double? scanArea = (MediaQuery.of(context).size.width < 400 ||
-            MediaQuery.of(context).size.height < 400)
-        ? 150.0
-        : 300.0;
+    double? scanArea = (MediaQuery.of(context).size.width < 300 ||
+            MediaQuery.of(context).size.height < 300)
+        ? 150.00
+        : 150.0;
 
     void _onPermissionSet(BuildContext context, QRViewController ctrl, bool p) {
       log('${DateTime.now().toIso8601String()}_onPermissionSet $p');
@@ -34,7 +34,7 @@ class StartUpView extends StatelessWidget {
         body: Column(
           children: [
             Expanded(
-              flex: 4,
+              flex: 2,
               child: QRView(
                 key: model.qrKey,
                 onQRViewCreated: model.onQRViewCreated,
@@ -51,17 +51,16 @@ class StartUpView extends StatelessWidget {
             ),
             Expanded(
               flex: 1,
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    model.result != null
-                        ? Text(
-                            'Type: ${describeEnum(model.result!.format)}   Data: ${model.result!.code}')
-                        : const Text('Scan a code')
-                  ],
-                ),
+              child: SingleChildScrollView(
+                child: model.result != null
+                    ? Text(
+                        'Type: ${describeEnum(model.result!.format)} \nData: ${model.result!.code}',
+                        style: TextStyle(fontSize: 25),
+                      )
+                    : const Text(
+                        'Scan a code',
+                        style: TextStyle(fontSize: 40),
+                      ),
               ),
             ),
           ],
