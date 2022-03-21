@@ -26,10 +26,20 @@ class StartUpView extends StatelessWidget {
             Expanded(
               flex: 1,
               child: SingleChildScrollView(
-                child: model.result != null
-                    ? Text(
-                        'Type: ${describeEnum(model.result!.format)} \nData: ${model.result!.rawValue}',
-                        style: const TextStyle(fontSize: 25),
+                child: model.result != null && model.fieldValues != {}
+                    ? Column(
+                        children: [
+                          Text(
+                            '${model.result?['channel']['name']}',
+                            style: const TextStyle(fontSize: 25),
+                          ),
+                          ...model.fieldValues.entries.map(
+                            (entry) => Text(
+                              '${entry.key}: ${entry.value}',
+                              style: const TextStyle(fontSize: 20),
+                            ),
+                          ),
+                        ],
                       )
                     : const Text(
                         'Scan a code',
