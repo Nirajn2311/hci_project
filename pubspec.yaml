@@ -14,10 +14,10 @@ dependencies:
   stacked: ^2.2.8
   stacked_services: ^0.8.16
   logger: ^1.1.0
-  qr_code_scanner: ^0.6.1
   http: ^0.13.4
   dio: ^4.0.4
   jiffy: ^5.0.0
+  mobile_scanner: ^1.0.0
 
 dev_dependencies:
   flutter_test:
