@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:stacked/stacked.dart';
 
@@ -14,8 +15,8 @@ class StartUpViewModel extends BaseViewModel {
   void updateQR(Barcode barcode) async {
     log('NEW QR DETECTED');
     currQR = barcode.rawValue!;
-    Response dioRes = await dio
-        .get('https://api.thingspeak.com/channels/$currQR/feed.json');
+    Response dioRes =
+        await dio.get('https://api.thingspeak.com/channels/$currQR/feed.json');
     result = dioRes.data;
     sensorValues = {};
     result?['channel'].entries.forEach((entry) {
@@ -41,6 +42,7 @@ class StartUpViewModel extends BaseViewModel {
       log(key);
       log(value[0].toString());
     });
+    HapticFeedback.vibrate();
     notifyListeners();
   }
 }
