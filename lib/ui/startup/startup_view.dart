@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hci_project/ui/startup/startup_viewmodel.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -37,6 +38,7 @@ class StartUpView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<StartUpViewModel>.reactive(
       viewModelBuilder: () => StartUpViewModel(),
+      onModelReady: (model) => model.initState(context),
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
           title: const Text('HCI Project'),
@@ -45,17 +47,16 @@ class StartUpView extends StatelessWidget {
           renderPanelSheet: false,
           backdropOpacity: 0.3,
           panel: Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(24.0),
-                  topRight: Radius.circular(24.0)),
-              boxShadow: [
-                BoxShadow(
-                  blurRadius: 20.0,
-                  color: Colors.grey,
-                ),
-              ],
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24.0),
+                topRight: Radius.circular(24.0),
+              ),
+              border: Border.all(
+                color: Colors.black,
+                width: 3,
+              ),
             ),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -70,7 +71,7 @@ class StartUpView extends StatelessWidget {
                         ),
                         ...model.sensorValues.entries.map(
                           (entry) => Text(
-                            '${entry.key}: ${entry.value[0].y}',
+                            '${entry.key}: ${entry.value.last.y}',
                             style: const TextStyle(fontSize: 20),
                           ),
                         ),
@@ -84,17 +85,58 @@ class StartUpView extends StatelessWidget {
                     ),
             ),
           ),
-          body: QRView(
-            key: model.qrKey,
-            onQRViewCreated: model.onQRViewCreated,
-            overlay: QrScannerOverlayShape(
-              borderColor: Colors.red,
-              borderRadius: 10,
-              borderLength: 30,
-              borderWidth: 10,
-              cutOutSize: 200,
-              cutOutBottomOffset: 250,
-            ),
+          body: Stack(
+            alignment: Alignment.center,
+            children: [
+              QRView(
+                key: model.qrKey,
+                onQRViewCreated: model.onQRViewCreated,
+                overlay: QrScannerOverlayShape(
+                  borderColor: Colors.red,
+                  borderRadius: 10,
+                  borderLength: 30,
+                  borderWidth: 10,
+                  cutOutSize: 200,
+                  cutOutBottomOffset: 150,
+                ),
+              ),
+              model.sensorValues.entries.isNotEmpty
+                  ? IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          const Icon(
+                            CupertinoIcons.triangle_fill,
+                            color: Colors.black,
+                          ),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: const BorderRadius.all(Radius.circular(8)),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 3,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                ...model.sensorValues.entries
+                                    .toList()
+                                    .take(3)
+                                    .map(
+                                      (entry) => Text(
+                                        '${entry.key}: ${entry.value.last.y}',
+                                        style: const TextStyle(fontSize: 20),
+                                      ),
+                                    ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    )
+                  : Container()
+            ],
           ),
         ),
       ),

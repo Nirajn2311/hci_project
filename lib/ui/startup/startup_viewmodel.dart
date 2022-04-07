@@ -8,6 +8,7 @@ import 'package:stacked/stacked.dart';
 
 class StartUpViewModel extends BaseViewModel {
   Map<String, dynamic>? result;
+  BuildContext? context;
   // ignore: non_constant_identifier_names
   Barcode? QRres;
   final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
@@ -16,6 +17,10 @@ class StartUpViewModel extends BaseViewModel {
   Map<String, List<SensorData>> sensorValues = {};
   Map<String, String> fields = {};
   Dio dio = Dio();
+
+  void initState(BuildContext ctx) {
+    context = ctx;
+  }
 
   void openCamera() {
     log('Camera opened');
@@ -30,8 +35,8 @@ class StartUpViewModel extends BaseViewModel {
         log('NEW QR DETECTED');
         log(QRres?.code ?? 'null');
         currQR = QRres?.code ?? '';
-        Response dioRes = await dio.get(
-            'https://api.thingspeak.com/channels/$currQR/feed.json');
+        Response dioRes = await dio
+            .get('https://api.thingspeak.com/channels/$currQR/feed.json');
         result = dioRes.data;
         sensorValues = {};
         result?['channel'].entries.forEach((entry) {
