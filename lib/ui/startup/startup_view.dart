@@ -93,6 +93,7 @@ class StartUpView extends StatelessWidget {
               borderLength: 30,
               borderWidth: 10,
               cutOutSize: 200,
+              cutOutBottomOffset: 250,
             ),
           ),
         ),
