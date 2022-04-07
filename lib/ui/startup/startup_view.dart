@@ -2,14 +2,37 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hci_project/ui/startup/startup_viewmodel.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:stacked/stacked.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class StartUpView extends StatelessWidget {
   const StartUpView({Key? key}) : super(key: key);
+
+  SfCartesianChart _generateChart(Map<String, List<SensorData>> sensorValues) {
+    MapEntry<String, List<SensorData>> data = sensorValues.entries.elementAt(
+      Random().nextInt(
+        sensorValues.entries.length,
+      ),
+    );
+    return SfCartesianChart(
+      title: ChartTitle(text: data.key),
+      primaryXAxis: DateTimeAxis(
+        edgeLabelPlacement: EdgeLabelPlacement.shift,
+        intervalType: DateTimeIntervalType.auto,
+        name: 'Time',
+      ),
+      series: <LineSeries<SensorData, DateTime>>[
+        LineSeries<SensorData, DateTime>(
+          dataSource: data.value,
+          xValueMapper: (SensorData data, _) => data.x,
+          yValueMapper: (SensorData data, _) => data.y,
+        )
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,26 +75,7 @@ class StartUpView extends StatelessWidget {
                             style: const TextStyle(fontSize: 20),
                           ),
                         ),
-                        SfCartesianChart(
-                          primaryXAxis: DateTimeAxis(
-                            edgeLabelPlacement: EdgeLabelPlacement.shift,
-                            intervalType: DateTimeIntervalType.auto,
-                            // dateFormat: DateFormat.Hms(),
-                            name: 'Time',
-                            majorGridLines: const MajorGridLines(width: 0),
-                          ),
-                          series: <LineSeries<SensorData, DateTime>>[
-                            LineSeries<SensorData, DateTime>(
-                              dataSource: model.sensorValues.values.elementAt(
-                                Random().nextInt(
-                                  model.sensorValues.values.length,
-                                ),
-                              ),
-                              xValueMapper: (SensorData data, _) => data.x,
-                              yValueMapper: (SensorData data, _) => data.y,
-                            )
-                          ],
-                        )
+                        _generateChart(model.sensorValues),
                       ],
                     )
                   : const Text(

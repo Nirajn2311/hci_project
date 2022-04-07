@@ -15,7 +15,7 @@ class StartUpViewModel extends BaseViewModel {
     log('NEW QR DETECTED');
     currQR = barcode.rawValue!;
     Response dioRes = await dio
-        .get('https://api.thingspeak.com/channels/$currQR/feed.json?results=500');
+        .get('https://api.thingspeak.com/channels/$currQR/feed.json');
     result = dioRes.data;
     sensorValues = {};
     result?['channel'].entries.forEach((entry) {
