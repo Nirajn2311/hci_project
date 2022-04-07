@@ -1,9 +1,11 @@
 import 'dart:math';
+import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:hci_project/ui/startup/startup_viewmodel.dart';
 // import 'package:intl/intl.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
+// import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:stacked/stacked.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -36,8 +38,11 @@ class StartUpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // double? scanArea = 150;
+
     return ViewModelBuilder<StartUpViewModel>.reactive(
       viewModelBuilder: () => StartUpViewModel(),
+
       builder: (context, model, child) => Scaffold(
         appBar: AppBar(
           title: const Text('HCI Project'),
@@ -85,15 +90,26 @@ class StartUpView extends StatelessWidget {
                     ),
             ),
           ),
-          body: Column(
-            children: [
-              Expanded(
-                // flex: 2,
-                child: MobileScanner(
-                  onDetect: (barcode, args) => model.updateQR(barcode),
-                ),
-              ),
-            ],
+          // body: Column(
+          //   children: [
+          //     Expanded(
+          //       // flex: 2,
+          //       child: MobileScanner(
+          //         onDetect: (barcode, args) => model.updateQR(barcode),
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          body: QRView(
+            key: model.qrKey,
+            onQRViewCreated: model.onQRViewCreated,
+            overlay: QrScannerOverlayShape(
+              borderColor: Colors.red,
+              borderRadius: 10,
+              borderLength: 30,
+              borderWidth: 10,
+              cutOutSize: 200,
+            ),
           ),
         ),
       ),
