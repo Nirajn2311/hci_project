@@ -31,36 +31,48 @@ class StartUpViewModel extends BaseViewModel {
     notifyListeners();
     controller?.scannedDataStream.listen((scanData) async {
       QRres = scanData;
-      if (QRres?.code != currQR) {
+      log(currQR);
+      log(QRres.toString());
+      if (currQR == '' || QRres?.code != currQR) {
         log('NEW QR DETECTED');
         log(QRres?.code ?? 'null');
         currQR = QRres?.code ?? '';
+        log('FETCHING DATA');
         Response dioRes = await dio
             .get('https://api.thingspeak.com/channels/$currQR/feed.json');
+        log('DATA FETCHED');
         result = dioRes.data;
         sensorValues = {};
+        fields = {};
+        log('RESULTS PARSED');
         result?['channel'].entries.forEach((entry) {
           if (entry.key.toString().startsWith('field')) {
             sensorValues[entry.value] = [];
             fields[entry.key] = entry.value;
           }
         });
+        log('FIELDS PARSED');
+        log(result.toString());
+        log(sensorValues.toString());
+        log(fields.toString());
         result?['feeds'].forEach((feedEntry) {
           feedEntry.entries.forEach((entry) {
             if (entry.key.toString().startsWith('field')) {
               sensorValues[fields[entry.key]]?.add(
                 SensorData(
                   x: DateTime.parse(feedEntry['created_at']),
-                  y: double.parse(feedEntry[entry.key]),
+                  y: double.parse(feedEntry[entry.key] ?? '0'),
                 ),
               );
             }
           });
         });
+        log('DATA PARSED');
         sensorValues.forEach((key, value) {
           log(key);
           log(value[0].toString());
         });
+        log('DATA SENT TO VIEW');
         HapticFeedback.vibrate();
         notifyListeners();
       }

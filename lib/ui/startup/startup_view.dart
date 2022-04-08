@@ -34,6 +34,16 @@ class StartUpView extends StatelessWidget {
     );
   }
 
+  Color _setTextColor(num? value) {
+    if (value == null) {
+      return Colors.black;
+    } else if (value < 1000) {
+      return Colors.green;
+    } else {
+      return Colors.red;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<StartUpViewModel>.reactive(
@@ -69,13 +79,19 @@ class StartUpView extends StatelessWidget {
                           style: const TextStyle(fontSize: 25),
                           textAlign: TextAlign.center,
                         ),
-                        ...model.sensorValues.entries.map(
-                          (entry) => Text(
-                            '${entry.key}: ${entry.value.last.y}',
-                            style: const TextStyle(fontSize: 20),
+                        SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              ...model.sensorValues.entries.map(
+                                (entry) => Text(
+                                  '${entry.key}: ${entry.value.last.y}',
+                                  style: const TextStyle(fontSize: 20),
+                                ),
+                              ),
+                              _generateChart(model.sensorValues),
+                            ],
                           ),
                         ),
-                        _generateChart(model.sensorValues),
                       ],
                     )
                   : const Text(
@@ -112,7 +128,8 @@ class StartUpView extends StatelessWidget {
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: const BorderRadius.all(Radius.circular(8)),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(8)),
                               border: Border.all(
                                 color: Colors.black,
                                 width: 3,
@@ -126,7 +143,10 @@ class StartUpView extends StatelessWidget {
                                     .map(
                                       (entry) => Text(
                                         '${entry.key}: ${entry.value.last.y}',
-                                        style: const TextStyle(fontSize: 20),
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            color: _setTextColor(
+                                                entry.value.last.y)),
                                       ),
                                     ),
                               ],
