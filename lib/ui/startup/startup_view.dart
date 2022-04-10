@@ -56,51 +56,76 @@ class StartUpView extends StatelessWidget {
         body: SlidingUpPanel(
           renderPanelSheet: false,
           backdropOpacity: 0.3,
-          panel: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(24.0),
-                topRight: Radius.circular(24.0),
-              ),
-              border: Border.all(
-                color: Colors.black,
-                width: 3,
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-              child: model.result != null && model.sensorValues != {}
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          '${model.result?['channel']['name']}',
-                          style: const TextStyle(fontSize: 25),
-                          textAlign: TextAlign.center,
-                        ),
-                        SingleChildScrollView(
-                          child: Column(
+          collapsed: model.isLoading
+              ? const Center(
+                  child: Text(
+                    'Loading...',
+                    style: TextStyle(fontSize: 40),
+                    textAlign: TextAlign.center,
+                  ),
+                )
+              : model.currQR.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Scan QR code',
+                        style: TextStyle(fontSize: 40),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  : const Center(
+                      child: Text(
+                        'Pull for details',
+                        style: TextStyle(fontSize: 40),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+          panelBuilder: (ScrollController sc) {
+            child ??= Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24.0),
+                    topRight: Radius.circular(24.0),
+                  ),
+                  border: Border.all(
+                    color: Colors.black,
+                    width: 3,
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  controller: sc,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                    child: model.result != null && model.sensorValues != {}
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              ...model.sensorValues.entries.map(
-                                (entry) => Text(
-                                  '${entry.key}: ${entry.value.last.y}',
-                                  style: const TextStyle(fontSize: 20),
+                              Text(
+                                '${model.result?['channel']['name']}',
+                                style: const TextStyle(fontSize: 25),
+                                textAlign: TextAlign.center,
+                              ),
+                              SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    ...model.sensorValues.entries.map(
+                                      (entry) => Text(
+                                        '${entry.key}: ${entry.value.last.y}',
+                                        style: const TextStyle(fontSize: 20),
+                                      ),
+                                    ),
+                                    _generateChart(model.sensorValues),
+                                  ],
                                 ),
                               ),
-                              _generateChart(model.sensorValues),
                             ],
-                          ),
-                        ),
-                      ],
-                    )
-                  : const Text(
-                      'Scan a code',
-                      style: TextStyle(fontSize: 40),
-                      textAlign: TextAlign.center,
-                    ),
-            ),
-          ),
+                          )
+                        : Container(),
+                  ),
+                ),
+              );
+            return child!;
+          },
           body: Stack(
             alignment: Alignment.center,
             children: [
@@ -116,7 +141,7 @@ class StartUpView extends StatelessWidget {
                   cutOutBottomOffset: 150,
                 ),
               ),
-              model.sensorValues.entries.isNotEmpty
+              model.isLoading
                   ? IntrinsicHeight(
                       child: Column(
                         children: [
@@ -135,27 +160,54 @@ class StartUpView extends StatelessWidget {
                                 width: 3,
                               ),
                             ),
-                            child: Column(
-                              children: [
-                                ...model.sensorValues.entries
-                                    .toList()
-                                    .take(3)
-                                    .map(
-                                      (entry) => Text(
-                                        '${entry.key}: ${entry.value.last.y}',
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            color: _setTextColor(
-                                                entry.value.last.y)),
-                                      ),
-                                    ),
-                              ],
-                            ),
+                            child: const CircularProgressIndicator(),
                           )
                         ],
                       ),
                     )
-                  : Container()
+                  : model.sensorValues.entries.isNotEmpty
+                      ? IntrinsicHeight(
+                          child: Column(
+                            children: [
+                              const Icon(
+                                CupertinoIcons.triangle_fill,
+                                color: Colors.black,
+                              ),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: const BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 3,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    ...model.sensorValues.entries
+                                        .toList()
+                                        .take(3)
+                                        .map(
+                                          (entry) => Text(
+                                            '${entry.key}: ${entry.value.last.y}',
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              color: _setTextColor(
+                                                entry.value.last.y,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                  ],
+                                ),
+                              )
+                            ],
+                          ),
+                        )
+                      : Container()
             ],
           ),
         ),

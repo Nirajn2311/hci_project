@@ -17,6 +17,7 @@ class StartUpViewModel extends BaseViewModel {
   Map<String, List<SensorData>> sensorValues = {};
   Map<String, String> fields = {};
   Dio dio = Dio();
+  bool isLoading = false;
 
   void initState(BuildContext ctx) {
     context = ctx;
@@ -32,12 +33,13 @@ class StartUpViewModel extends BaseViewModel {
     controller?.scannedDataStream.listen((scanData) async {
       QRres = scanData;
       log(currQR);
-      log(QRres.toString());
       if (currQR == '' || QRres?.code != currQR) {
         log('NEW QR DETECTED');
         log(QRres?.code ?? 'null');
         currQR = QRres?.code ?? '';
         log('FETCHING DATA');
+        isLoading = true;
+        notifyListeners();
         Response dioRes = await dio
             .get('https://api.thingspeak.com/channels/$currQR/feed.json');
         log('DATA FETCHED');
@@ -73,6 +75,7 @@ class StartUpViewModel extends BaseViewModel {
           log(value[0].toString());
         });
         log('DATA SENT TO VIEW');
+        isLoading = false;
         HapticFeedback.vibrate();
         notifyListeners();
       }
