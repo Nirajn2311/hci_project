@@ -19,6 +19,8 @@ class StartUpViewModel extends BaseViewModel {
   Dio dio = Dio();
   bool isLoading = false;
   bool isError = false;
+  String err = '';
+  String errST = '';
 
   void initState(BuildContext ctx) {
     context = ctx;
@@ -41,14 +43,14 @@ class StartUpViewModel extends BaseViewModel {
         log('FETCHING DATA');
         isLoading = true;
         isError = false;
+        sensorValues = {};
+        fields = {};
         try {
           notifyListeners();
           Response dioRes = await dio
               .get('https://api.thingspeak.com/channels/$currQR/feed.json');
           log('DATA FETCHED');
           result = dioRes.data;
-          sensorValues = {};
-          fields = {};
           log('RESULTS PARSED');
           result?['channel'].entries.forEach((entry) {
             if (entry.key.toString().startsWith('field')) {
@@ -81,8 +83,12 @@ class StartUpViewModel extends BaseViewModel {
           isLoading = false;
           HapticFeedback.vibrate();
           notifyListeners();
-        } catch (e) {
+        } catch (e, st) {
           log('ERROR');
+          log(e.toString());
+          log(st.toString());
+          err = e.toString();
+          errST = st.toString();
           isLoading = false;
           isError = true;
           notifyListeners();
@@ -92,6 +98,8 @@ class StartUpViewModel extends BaseViewModel {
       log('ERROR');
       log(e.toString());
       log(st.toString());
+      err = e.toString();
+      errST = st.toString();
       isError = true;
       isLoading = false;
       HapticFeedback.vibrate();

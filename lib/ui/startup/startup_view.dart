@@ -110,32 +110,46 @@ class StartUpView extends StatelessWidget {
               child: SingleChildScrollView(
                 controller: sc,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: model.result != null && model.sensorValues != {}
+                  padding: const EdgeInsets.fromLTRB(16, 108, 16, 8),
+                  child: model.isError
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              '${model.result?['channel']['name']}',
+                              model.err,
                               style: const TextStyle(fontSize: 25),
-                              textAlign: TextAlign.center,
                             ),
-                            SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  ...model.sensorValues.entries.map(
-                                    (entry) => Text(
-                                      '${entry.key}: ${entry.value.last.y}',
-                                      style: const TextStyle(fontSize: 20),
-                                    ),
-                                  ),
-                                  _generateChart(model.sensorValues),
-                                ],
-                              ),
+                            Text(
+                              model.errST,
+                              style: const TextStyle(fontSize: 16),
                             ),
                           ],
                         )
-                      : Container(),
+                      : model.result != null && model.sensorValues != {}
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Text(
+                                  '${model.result?['channel']['name']}',
+                                  style: const TextStyle(fontSize: 25),
+                                  textAlign: TextAlign.center,
+                                ),
+                                SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      ...model.sensorValues.entries.map(
+                                        (entry) => Text(
+                                          '${entry.key}: ${entry.value.last.y}',
+                                          style: const TextStyle(fontSize: 20),
+                                        ),
+                                      ),
+                                      _generateChart(model.sensorValues),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Container(),
                 ),
               ),
             );
