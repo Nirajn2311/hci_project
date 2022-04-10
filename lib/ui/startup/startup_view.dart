@@ -44,6 +44,43 @@ class StartUpView extends StatelessWidget {
     }
   }
 
+  Widget _collapsedView(StartUpViewModel model) {
+    if (model.isLoading) {
+      return const Center(
+        child: Text(
+          'Loading...',
+          style: TextStyle(fontSize: 40),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    if (model.isError) {
+      return const Center(
+        child: Text(
+          'ERROR!',
+          style: TextStyle(fontSize: 40),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    if (model.currQR.isEmpty) {
+      return const Center(
+        child: Text(
+          'Scan QR code',
+          style: TextStyle(fontSize: 40),
+          textAlign: TextAlign.center,
+        ),
+      );
+    }
+    return const Center(
+      child: Text(
+        'Pull for details',
+        style: TextStyle(fontSize: 40),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<StartUpViewModel>.reactive(
@@ -56,74 +93,52 @@ class StartUpView extends StatelessWidget {
         body: SlidingUpPanel(
           renderPanelSheet: false,
           backdropOpacity: 0.3,
-          collapsed: model.isLoading
-              ? const Center(
-                  child: Text(
-                    'Loading...',
-                    style: TextStyle(fontSize: 40),
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : model.currQR.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Scan QR code',
-                        style: TextStyle(fontSize: 40),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  : const Center(
-                      child: Text(
-                        'Pull for details',
-                        style: TextStyle(fontSize: 40),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+          collapsed: Container(child: _collapsedView(model)),
           panelBuilder: (ScrollController sc) {
             child ??= Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(24.0),
-                    topRight: Radius.circular(24.0),
-                  ),
-                  border: Border.all(
-                    color: Colors.black,
-                    width: 3,
-                  ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(24.0),
+                  topRight: Radius.circular(24.0),
                 ),
-                child: SingleChildScrollView(
-                  controller: sc,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                    child: model.result != null && model.sensorValues != {}
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                '${model.result?['channel']['name']}',
-                                style: const TextStyle(fontSize: 25),
-                                textAlign: TextAlign.center,
-                              ),
-                              SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    ...model.sensorValues.entries.map(
-                                      (entry) => Text(
-                                        '${entry.key}: ${entry.value.last.y}',
-                                        style: const TextStyle(fontSize: 20),
-                                      ),
+                border: Border.all(
+                  color: Colors.black,
+                  width: 3,
+                ),
+              ),
+              child: SingleChildScrollView(
+                controller: sc,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  child: model.result != null && model.sensorValues != {}
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              '${model.result?['channel']['name']}',
+                              style: const TextStyle(fontSize: 25),
+                              textAlign: TextAlign.center,
+                            ),
+                            SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  ...model.sensorValues.entries.map(
+                                    (entry) => Text(
+                                      '${entry.key}: ${entry.value.last.y}',
+                                      style: const TextStyle(fontSize: 20),
                                     ),
-                                    _generateChart(model.sensorValues),
-                                  ],
-                                ),
+                                  ),
+                                  _generateChart(model.sensorValues),
+                                ],
                               ),
-                            ],
-                          )
-                        : Container(),
-                  ),
+                            ),
+                          ],
+                        )
+                      : Container(),
                 ),
-              );
+              ),
+            );
             return child!;
           },
           body: Stack(

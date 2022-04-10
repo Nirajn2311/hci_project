@@ -18,6 +18,7 @@ class StartUpViewModel extends BaseViewModel {
   Map<String, String> fields = {};
   Dio dio = Dio();
   bool isLoading = false;
+  bool isError = false;
 
   void initState(BuildContext ctx) {
     context = ctx;
@@ -39,46 +40,63 @@ class StartUpViewModel extends BaseViewModel {
         currQR = QRres?.code ?? '';
         log('FETCHING DATA');
         isLoading = true;
-        notifyListeners();
-        Response dioRes = await dio
-            .get('https://api.thingspeak.com/channels/$currQR/feed.json');
-        log('DATA FETCHED');
-        result = dioRes.data;
-        sensorValues = {};
-        fields = {};
-        log('RESULTS PARSED');
-        result?['channel'].entries.forEach((entry) {
-          if (entry.key.toString().startsWith('field')) {
-            sensorValues[entry.value] = [];
-            fields[entry.key] = entry.value;
-          }
-        });
-        log('FIELDS PARSED');
-        log(result.toString());
-        log(sensorValues.toString());
-        log(fields.toString());
-        result?['feeds'].forEach((feedEntry) {
-          feedEntry.entries.forEach((entry) {
+        isError = false;
+        try {
+          notifyListeners();
+          Response dioRes = await dio
+              .get('https://api.thingspeak.com/channels/$currQR/feed.json');
+          log('DATA FETCHED');
+          result = dioRes.data;
+          sensorValues = {};
+          fields = {};
+          log('RESULTS PARSED');
+          result?['channel'].entries.forEach((entry) {
             if (entry.key.toString().startsWith('field')) {
-              sensorValues[fields[entry.key]]?.add(
-                SensorData(
-                  x: DateTime.parse(feedEntry['created_at']),
-                  y: double.parse(feedEntry[entry.key] ?? '0'),
-                ),
-              );
+              sensorValues[entry.value] = [];
+              fields[entry.key] = entry.value;
             }
           });
-        });
-        log('DATA PARSED');
-        sensorValues.forEach((key, value) {
-          log(key);
-          log(value[0].toString());
-        });
-        log('DATA SENT TO VIEW');
-        isLoading = false;
-        HapticFeedback.vibrate();
-        notifyListeners();
+          log('FIELDS PARSED');
+          log(result.toString());
+          log(sensorValues.toString());
+          log(fields.toString());
+          result?['feeds'].forEach((feedEntry) {
+            feedEntry.entries.forEach((entry) {
+              if (entry.key.toString().startsWith('field')) {
+                sensorValues[fields[entry.key]]?.add(
+                  SensorData(
+                    x: DateTime.parse(feedEntry['created_at']),
+                    y: double.parse(feedEntry[entry.key] ?? '0'),
+                  ),
+                );
+              }
+            });
+          });
+          log('DATA PARSED');
+          sensorValues.forEach((key, value) {
+            log(key);
+            log(value[0].toString());
+          });
+          log('DATA SENT TO VIEW');
+          isLoading = false;
+          HapticFeedback.vibrate();
+          notifyListeners();
+        } catch (e) {
+          log('ERROR');
+          isLoading = false;
+          isError = true;
+          notifyListeners();
+        }
       }
+    }).onError((e, st) {
+      log('ERROR');
+      log(e.toString());
+      log(st.toString());
+      isError = true;
+      isLoading = false;
+      HapticFeedback.vibrate();
+      HapticFeedback.vibrate();
+      notifyListeners();
     });
   }
 
