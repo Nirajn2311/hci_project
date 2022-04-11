@@ -45,6 +45,7 @@ class StartUpViewModel extends BaseViewModel {
         isError = false;
         sensorValues = {};
         fields = {};
+        result = null;
         try {
           notifyListeners();
           Response dioRes = await dio
